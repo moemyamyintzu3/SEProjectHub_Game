@@ -1,11 +1,13 @@
-import { cloneElement, useCallback, useEffect, useState } from 'react';
+import { cloneElement, useCallback, useEffect, useRef, useState } from 'react';
 import { AnimatePresence, MotionConfig, motion } from 'framer-motion';
 import { Hubby } from './art';
 import { Background } from './components/Background';
 import { LangToggle } from './components/LangToggle';
+import { QrOverlay } from './components/QrOverlay';
+import { QrIcon } from './art/UiIcons';
 import { MemoryIntro, MemoryPlay, MemoryResult, type MemoryOutcome } from './games/MemoryMatch';
 import { WheelPlay, WheelResult } from './games/SpinWheel';
-import { LangProvider } from './i18n';
+import { LangProvider, useLang } from './i18n';
 import { Home } from './screens/Home';
 
 type Route =
@@ -29,6 +31,34 @@ function Shell() {
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [route]);
+
+  // ---- QR overlay. Disabled while a Memory Match round runs, so its timer is never interrupted.
+  const { t } = useLang();
+  const [qrOpen, setQrOpen] = useState(false);
+  const qrBtn = useRef<HTMLButtonElement>(null);
+  const qrDisabled = route.name === 'playM';
+  const qrDisabledRef = useRef(qrDisabled);
+  useEffect(() => {
+    qrDisabledRef.current = qrDisabled;
+  }, [qrDisabled]);
+
+  const closeQr = useCallback(() => {
+    setQrOpen(false);
+    if (window.location.hash === '#qr') {
+      history.replaceState(null, '', window.location.pathname + window.location.search);
+    }
+    qrBtn.current?.focus();
+  }, []);
+
+  // Booth mode: https://.../#qr opens the overlay directly (on load or when the hash changes).
+  useEffect(() => {
+    const check = () => {
+      if (window.location.hash === '#qr' && !qrDisabledRef.current) setQrOpen(true);
+    };
+    check();
+    window.addEventListener('hashchange', check);
+    return () => window.removeEventListener('hashchange', check);
+  }, []);
 
   const home = () => go({ name: 'home' });
   const introM = () => go({ name: 'introM' });
@@ -70,9 +100,26 @@ function Shell() {
             className="flex min-h-[44px] items-center gap-2 rounded-full border border-white/15 bg-white/10 py-1 pr-3 pl-1.5 font-mitr text-[15px] whitespace-nowrap text-white backdrop-blur-md max-[359px]:pr-2.5 max-[359px]:text-[13px]"
           >
             <Hubby size={30} />
-            SE Project Hub
+            <span className="max-[359px]:sr-only">SE Project Hub</span>
           </motion.button>
-          <LangToggle />
+          <div className="flex items-center gap-2">
+            <motion.button
+              ref={qrBtn}
+              type="button"
+              onClick={() => setQrOpen(true)}
+              disabled={qrDisabled}
+              aria-label={t('qrAria')}
+              aria-haspopup="dialog"
+              whileHover={qrDisabled ? undefined : { scale: 1.05 }}
+              whileTap={qrDisabled ? undefined : { scale: 0.92 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+              className={`flex h-[50px] min-w-[50px] items-center justify-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-3 font-mitr text-[14px] text-white backdrop-blur-md transition-opacity max-[399px]:px-0 ${qrDisabled ? 'opacity-40' : ''}`}
+            >
+              <QrIcon className="h-5 w-5" />
+              <span className="max-[399px]:hidden">{t('qrBtn')}</span>
+            </motion.button>
+            <LangToggle />
+          </div>
         </header>
         <main className="flex flex-1 flex-col">
           <AnimatePresence mode="wait">
@@ -80,6 +127,7 @@ function Shell() {
           </AnimatePresence>
         </main>
       </div>
+      <AnimatePresence>{qrOpen && <QrOverlay onClose={closeQr} />}</AnimatePresence>
     </>
   );
 }
