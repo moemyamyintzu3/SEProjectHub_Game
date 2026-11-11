@@ -4,8 +4,8 @@ Two quick booth games that explain **SE Project Hub**, our senior project. It's 
 
 School of Applied Digital Technology, Mae Fah Luang University.
 
-- **Match the Pairs! / จับคู่ให้ไว!**: peek at 10 cards for 3 seconds, then find all 5 pairs in 25 seconds.
-- **Spin the Hub Wheel! / หมุนวงล้อ Hub!**: 3 spins, each one lands on a topic with one easy question (or a free Bonus point).
+- **Match the Pairs! / จับคู่ให้ไว!**: peek at 10 cards for 3 seconds, then find all 5 pairs in 20 seconds.
+- **Spin the Hub Wheel! / หมุนวงล้อ Hub!**: 3 spins, each one lands on a topic with a random question (or a free Bonus point).
 
 Thai is the default language. The TH/EN switch in the top-right corner remembers the choice on each device.
 
@@ -68,7 +68,7 @@ npx vercel --prod   # publish to the production URL
 
 - Open the site once on every booth device while you're online. The fonts come from Google Fonts. If the network drops, the games still work but use a fallback font.
 - Turn the screen brightness up, and turn off auto-lock so the screen doesn't go dark between players.
-- **Prize rules:** in Match the Pairs, a player wins by finding all 5 pairs within 25 seconds. In the Wheel, a player wins with a score of 2 or more out of 3. The winning screen shows a gold "You win a prize!" banner.
+- **Prize rules:** in Match the Pairs, a player wins by finding all 5 pairs within 20 seconds. In the Wheel, a player wins with a score of 2 or more out of 3. The winning screen shows a gold "You win a prize!" banner.
 - Tap **SE Project Hub** (top left) at any time to return to the home screen for the next player.
 
 ## Project structure

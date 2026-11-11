@@ -254,6 +254,16 @@ function QuestionModal({
 
 /* ============================ PLAY ============================ */
 
+/** Same question with its choices in a random order (the correct index follows its answer). */
+function shuffleChoices(q: Question): Question {
+  const order = q.o.map((_, i) => i);
+  for (let i = order.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [order[i], order[j]] = [order[j], order[i]];
+  }
+  return { ...q, o: order.map((i) => q.o[i]), a: order.indexOf(q.a) };
+}
+
 type Banner = { k: 'wReady' | 'wSpinning' | 'wDone' } | { k: 'wLeft'; n: number };
 
 export function WheelPlay({ onDone, onQuit }: { onDone: (score: number) => void; onQuit: () => void }) {
@@ -310,10 +320,12 @@ export function WheelPlay({ onDone, onQuit }: { onDone: (score: number) => void;
     } else {
       const list = QS[tp.id];
       const seen = (used.current[tp.id] ??= []);
-      let qi = [0, 1].find((i) => !seen.includes(i));
-      if (qi === undefined) qi = Math.floor(Math.random() * list.length);
+      // random question this player hasn't had yet (all used: any random one)
+      const fresh = list.map((_, i) => i).filter((i) => !seen.includes(i));
+      const pool = fresh.length ? fresh : list.map((_, i) => i);
+      const qi = pool[Math.floor(Math.random() * pool.length)];
       seen.push(qi);
-      next = { tp, bonus: false, q: list[qi], answered: null };
+      next = { tp, bonus: false, q: shuffleChoices(list[qi]), answered: null };
     }
     later(350, () => {
       setModal(next);
